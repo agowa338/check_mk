@@ -14,6 +14,9 @@ ENV CMK_DOWNLOADNR=${CMK_DOWNLOADNR_ARG}
 ENV CMK_SITE=${CMK_SITE_ARG}
 ENV MAILHUB=${MAILHUB}
 
+VOLUME [ "/opt/omd/sites/${CMK_SITE}/local", "/opt/omd/sites/${CMK_SITE}/etc/check_mk", "/opt/omd/sites/mva/tmp" ]
+EXPOSE 5000/tcp
+
 RUN \
     yum -y install epel-release && \
     yum install -y --nogpgcheck time \
@@ -40,6 +43,7 @@ RUN \
         php-mbstring \
         php-pdo \
         php-gd \
+        php-xml \
         rsync \
         uuid \
         xinetd \
@@ -72,17 +76,16 @@ RUN rpm -ivh https://mathias-kettner.de/support/${CMK_VERSION}/check-mk-raw-${CM
 
 # Creation of the site fails on creating tempfs, ignore it.
 # Now turn tempfs off after creating the site
-RUN omd create ${CMK_SITE} || \
-    omd config ${CMK_SITE} set DEFAULT_GUI check_mk && \
-    omd config ${CMK_SITE} set TMPFS off && \
-    omd config ${CMK_SITE} set CRONTAB on && \
-    omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0 && \
+RUN omd create ${CMK_SITE} || echo ignore error
+RUN omd init ${CMK_SITE} || echo ignore error
+RUN omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0 && \
     omd config ${CMK_SITE} set APACHE_TCP_PORT 5000 && \
+#    omd config ${CMK_SITE} set DEFAULT_GUI check_mk && \
+#    omd config ${CMK_SITE} set TMPFS off && \
+#    omd config ${CMK_SITE} set CRONTAB on && \
     htpasswd -b -m /omd/sites/${CMK_SITE}/etc/htpasswd ${DEFAULT_USERNAME} ${DEFAULT_PASSWORD} && \
     ln -s "/omd/sites/${CMK_SITE}/var/log/nagios.log" /var/log/nagios.log && \
     /opt/redirector.sh ${CMK_SITE} > /omd/sites/${CMK_SITE}/var/www/index.html
 
-EXPOSE 5000/tcp
-VOLUME [ "/opt/omd/sites/${CMK_SITE}/local", "/opt/omd/sites/${CMK_SITE}/etc/check_mk" ]
 WORKDIR /omd
 ENTRYPOINT ["/opt/bootstrap.sh"]
