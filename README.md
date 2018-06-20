@@ -56,7 +56,7 @@ Start Check_MK using:
     docker run -itd --name check_mk \
            --publish 80:5000 \
            --restart always \
-           nlmacamp/check_mk
+           agowa338/check_mk
 ```
 
 *OPTIONAL:* Specify outgoing mail server with `-e "MAILHUB=<IP:PORT>"`
