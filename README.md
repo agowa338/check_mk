@@ -1,4 +1,4 @@
-# nlmacamp/check_mk:1.4.0p15
+# agowa338/check_mk:1.5.0b7
 
 - [Introduction](#introduction)
   - [Contributing](#contributing)
