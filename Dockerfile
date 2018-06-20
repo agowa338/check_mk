@@ -79,13 +79,13 @@ RUN rpm -ivh https://mathias-kettner.de/support/${CMK_VERSION}/check-mk-raw-${CM
 RUN omd create ${CMK_SITE} || echo ignore error
 RUN omd init ${CMK_SITE} || echo ignore error
 RUN omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0 && \
-    omd config ${CMK_SITE} set APACHE_TCP_PORT 5000 && \
+    omd config ${CMK_SITE} set APACHE_TCP_PORT 5000
 #    omd config ${CMK_SITE} set DEFAULT_GUI check_mk && \
 #    omd config ${CMK_SITE} set TMPFS off && \
 #    omd config ${CMK_SITE} set CRONTAB on && \
-    htpasswd -b -m /omd/sites/${CMK_SITE}/etc/htpasswd ${DEFAULT_USERNAME} ${DEFAULT_PASSWORD} && \
-    ln -s "/omd/sites/${CMK_SITE}/var/log/nagios.log" /var/log/nagios.log && \
-    /opt/redirector.sh ${CMK_SITE} > /omd/sites/${CMK_SITE}/var/www/index.html
+RUN htpasswd -b -m /omd/sites/${CMK_SITE}/etc/htpasswd ${DEFAULT_USERNAME} ${DEFAULT_PASSWORD}
+RUN ln -s "/omd/sites/${CMK_SITE}/var/log/nagios.log" /var/log/nagios.log
+RUN /opt/redirector.sh ${CMK_SITE} > /omd/sites/${CMK_SITE}/var/www/index.html
 
 WORKDIR /omd
 ENTRYPOINT ["/opt/bootstrap.sh"]
