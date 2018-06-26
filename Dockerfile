@@ -14,9 +14,6 @@ ENV CMK_DOWNLOADNR=${CMK_DOWNLOADNR_ARG}
 ENV CMK_SITE=${CMK_SITE_ARG}
 ENV MAILHUB=${MAILHUB}
 
-VOLUME [ "/opt/omd/sites/${CMK_SITE}/local", "/opt/omd/sites/${CMK_SITE}/etc/check_mk", "/opt/omd/sites/mva/tmp" ]
-EXPOSE 5000/tcp
-
 RUN \
     yum -y install epel-release && \
     yum install -y --nogpgcheck time \
@@ -68,24 +65,33 @@ RUN \
         samba-client \
         rpcbind
 
-ADD    bootstrap.sh /opt/
-ADD    redirector.sh /opt/
-
 # retrieve and install the check mk binaries
 RUN rpm -ivh https://mathias-kettner.de/support/${CMK_VERSION}/check-mk-raw-${CMK_VERSION}-el7-${CMK_DOWNLOADNR}.x86_64.rpm
 
+# Workaround for check_mk init script failing if /etc/fstab is either empty or does not exist
+RUN echo " " > /etc/fstab
+
 # Creation of the site fails on creating tempfs, ignore it.
-# Now turn tempfs off after creating the site
 RUN omd create ${CMK_SITE} || echo ignore error
 RUN omd init ${CMK_SITE} || echo ignore error
-RUN omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0 && \
-    omd config ${CMK_SITE} set APACHE_TCP_PORT 5000
-#    omd config ${CMK_SITE} set DEFAULT_GUI check_mk && \
-#    omd config ${CMK_SITE} set TMPFS off && \
-#    omd config ${CMK_SITE} set CRONTAB on && \
-RUN htpasswd -b -m /omd/sites/${CMK_SITE}/etc/htpasswd ${DEFAULT_USERNAME} ${DEFAULT_PASSWORD}
-RUN ln -s "/omd/sites/${CMK_SITE}/var/log/nagios.log" /var/log/nagios.log
+
+# By default check_mk is only listening on the loopback interface
+RUN omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0
+
+# Set password
+RUN htpasswd -b -m -c /omd/sites/${CMK_SITE}/etc/htpasswd ${DEFAULT_USERNAME} ${DEFAULT_PASSWORD}
+
+ADD bootstrap.sh /opt/
+ADD redirector.sh /opt/
+ADD healthcheck.sh /opt/
+
 RUN /opt/redirector.sh ${CMK_SITE} > /omd/sites/${CMK_SITE}/var/www/index.html
 
+RUN ln -s "/omd/sites/${CMK_SITE}/var/log/nagios.log" /var/log/nagios.log
+
+VOLUME [ "/opt/omd/sites/${CMK_SITE}/local", "/opt/omd/sites/${CMK_SITE}/etc/check_mk", "/opt/omd/sites/${CMK_SITE}/tmp" ]
+EXPOSE 5000/tcp
+HEALTHCHECK CMD /opt/healthcheck.sh
+
 WORKDIR /omd
-ENTRYPOINT ["/opt/bootstrap.sh"]
+CMD "/opt/bootstrap.sh"
