@@ -4,6 +4,7 @@ variables:
   DOCKER_DRIVER: overlay2
   TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+  GIT_SUBMODULE_STRATEGY: recursive
 
 services:
   - docker:dind
@@ -39,6 +40,7 @@ dockerhub:on-schedule:
   stage: deploy
   only:
     - schedules
+  image: alpine:latest
   script:
     - apk add --update curl
     - curl --data build=true -X POST https://registry.hub.docker.com/u/agowa338/check_mk/trigger/$dockerhub_trigger_token/
