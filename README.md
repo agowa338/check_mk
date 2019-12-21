@@ -1,4 +1,4 @@
-# agowa338/check_mk:1.5.0b7
+# agowa338/check_mk
 
 - [Introduction](#introduction)
   - [Contributing](#contributing)
@@ -39,7 +39,7 @@ SELinux users should try disabling SELinux using the command `setenforce 0` to s
 Automated builds of the image are available on [Dockerhub](https://hub.docker.com/r/nlmacamp/check_mk) and is the recommended method of installation.
 
 ```bash
-docker pull agowa338/check_mk:1.5.0b7    (or agowa338/check_mk:latest)
+docker pull agowa338/check_mk:latest
 ```
 
 Alternatively you can build the image yourself.
