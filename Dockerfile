@@ -1,9 +1,9 @@
-FROM centos:7
+FROM centos:8
 
 # ARG can be overwritten on build time using "docker build --build-arg name=value"
-ARG CMK_VERSION="1.6.0b7"
+ARG CMK_VERSION="1.6.0b13"
 ARG CMK_DOWNLOADNR="38"
-ARG CMK_OS_VERSION="el7"
+ARG CMK_OS_VERSION="el8"
 
 ENV CMK_SITE="mva"
 ENV MAILHUB="undefined"
