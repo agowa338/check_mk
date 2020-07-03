@@ -70,10 +70,6 @@ RUN rpm -ivh https://checkmk.de/support/${CMK_VERSION}/check-mk-raw-${CMK_VERSIO
 # Workaround for check_mk init script failing if /etc/fstab is either empty or does not exist
 RUN echo " " > /etc/fstab
 
-RUN touch /etc/ssmtp/ssmtp.conf && \
-    chmod 640 /etc/ssmtp/ssmtp.conf && \
-    chown root:mail /etc/ssmtp/ssmtp.conf
-
 ADD bootstrap.sh /
 ADD healthcheck.sh /
 
