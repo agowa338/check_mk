@@ -2,12 +2,6 @@
 
 set -e
 
-cat >/etc/ssmtp/ssmtp.conf <<CONFIG
-root=root
-mailhub=${MAILHUB}
-FromLineOverride=YES
-CONFIG
-
 # By default check_mk is only listening on the loopback interface
 omd create ${CMK_SITE}
 omd config ${CMK_SITE} set APACHE_TCP_ADDR 0.0.0.0

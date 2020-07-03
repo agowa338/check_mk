@@ -1,7 +1,7 @@
 FROM centos:8
 
 # ARG can be overwritten on build time using "docker build --build-arg name=value"
-ARG CMK_VERSION="1.6.0b13"
+ARG CMK_VERSION="1.6.0p13"
 ARG CMK_DOWNLOADNR="38"
 ARG CMK_OS_VERSION="el8"
 
@@ -14,7 +14,7 @@ ENV BCRYPT_ITERATION="18"
 # Install required packages
 RUN \
     yum -y install epel-release && \
-    yum install -y --nogpgcheck time \
+    dnf --enablerepo=PowerTools install -y --nogpgcheck time \
         traceroute \
         dialog \
         fping \
@@ -34,6 +34,8 @@ RUN \
         perl-Net-SNMP \
         perl-Locale-Maketext-Simple \
         perl-IO-Zlib \
+        php-json \
+        perl-Net-Ping \
         php \
         php-mbstring \
         php-pdo \
@@ -43,21 +45,19 @@ RUN \
         uuid \
         xinetd \
         cronie \
-        python-ldap \
+        python3-ldap \
         freeradius-utils \
         libpcap \
-        python-reportlab \
+        python3-reportlab \
         bind-utils \
-        python-imaging \
+        python3-imaging \
         poppler-utils \
         libgsf \
         rpm-build \
-        pyOpenSSL \
+        python3-pyOpenSSL \
         fping \
         libmcrypt \
-        perl-Net-SNMP \
         which \
-        ssmtp \
         mailx \
         openssh-clients \
         samba-client \
@@ -65,7 +65,7 @@ RUN \
         postgresql-libs
 
 # retrieve and install the check mk binaries
-RUN rpm -ivh https://checkmk.com/support/${CMK_VERSION}/check-mk-raw-${CMK_VERSION}-${CMK_OS_VERSION}-${CMK_DOWNLOADNR}.x86_64.rpm
+RUN rpm -ivh https://checkmk.de/support/${CMK_VERSION}/check-mk-raw-${CMK_VERSION}-${CMK_OS_VERSION}-${CMK_DOWNLOADNR}.x86_64.rpm
 
 # Workaround for check_mk init script failing if /etc/fstab is either empty or does not exist
 RUN echo " " > /etc/fstab
@@ -83,3 +83,4 @@ HEALTHCHECK CMD /healthcheck.sh
 
 WORKDIR /omd
 CMD [ "/bootstrap.sh" ]
+
